@@ -31,8 +31,33 @@ public class Compte {
     private LocalDate dateCreation;
 
     private Double solde;
+    private String titulaire;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
+
+    public String getNumeroCompte() {
+        return numeroCompte;
+    }
+
+    public void setNumeroCompte(String numeroCompte) {
+        this.numeroCompte = numeroCompte;
+    }
+
+    public String getTitulaire() {
+        return titulaire;
+    }
+
+    public void setTitulaire(String titulaire) {
+        this.titulaire = titulaire;
+    }
+
+    public double getSolde() {
+        return solde;
+    }
+
+    public void setSolde(double solde) {
+        this.solde = solde;
+    }
 }
