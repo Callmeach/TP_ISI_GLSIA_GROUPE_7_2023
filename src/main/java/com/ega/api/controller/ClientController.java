@@ -2,6 +2,7 @@ package com.ega.api.controller;
 
 import com.ega.api.entity.Client;
 import com.ega.api.repository.ClientRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -12,11 +13,9 @@ import java.util.List;
 @RequestMapping("/clients")
 
 public class ClientController {
-    private final ClientRepository clientRepository;
+    @Autowired
+    ClientRepository clientRepository;
 
-    public ClientController(ClientRepository clientRepository) {
-        this.clientRepository = clientRepository;
-    }
 
     @GetMapping("/all")
     public List<Client> getAllClients() {

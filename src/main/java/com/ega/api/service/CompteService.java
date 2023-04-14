@@ -3,6 +3,7 @@ package com.ega.api.service;
 
 import com.ega.api.entity.Compte;
 import com.ega.api.repository.CompteRepository;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -12,26 +13,21 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 
+@Data
 @Service
 public class CompteService {
-    private final CompteRepository compteRepository;
-
     @Autowired
-    public CompteService(CompteRepository compteRepository) {
-        this.compteRepository = compteRepository;
-    }
+    private CompteRepository compteRepository;
+
+//    public CompteService(CompteRepository compteRepository) {
+//        this.compteRepository = compteRepository;
+//    }
     //public List<Compte> ShowComptes() {
         //return compteRepository.findAll();
     //}
 
-    public Optional<List<Compte>> ShowComptes(){
-        List<Compte> comptes = compteRepository.findAll();
-        if(comptes.isEmpty()){
-            return Optional.empty();
-        } else {
-            System.out.println(comptes); // afficher la liste de comptes
-            return Optional.of(comptes);
-        }
+    public List<Compte> getComptes(){
+        return compteRepository.findAll();
     }
     public Optional<Compte> findByNumeroCompte(String numeroCompte) {
         return compteRepository.findByNumeroCompte(numeroCompte);
@@ -47,8 +43,8 @@ public class CompteService {
         Optional<Compte> optionalCompte = findCompte(id);
         if (optionalCompte.isPresent()) {
             Compte existingCompte = optionalCompte.get();
-            existingCompte.setNumeroCompte(compte.getNumeroCompte());
-            existingCompte.setTitulaire(compte.getTitulaire());
+            existingCompte.setTypeCompte(compte.getTypeCompte());
+            existingCompte.setClient(compte.getClient());
             existingCompte.setSolde(compte.getSolde());
             return compteRepository.save(existingCompte);
         } else {
@@ -57,16 +53,12 @@ public class CompteService {
     }
 
 
-
-    //public void deleteCompte(Integer id){
-        //compteRepository.deleteById(id);
-    //}
     public void deleteCompte(Integer id) {
-        Optional<Compte> optionalCompte = compteRepository.findByNumeroCompte(id);
-        if (optionalCompte.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Compte introuvable");
+        Optional<Compte> compte = compteRepository.findById(id);
+        if (compte.isPresent()) {
+            compteRepository.deleteById(id);
         } else {
-            compteRepository.deleteById(optionalCompte.get().getId());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ce compte n'existe pas");
         }
     }
 

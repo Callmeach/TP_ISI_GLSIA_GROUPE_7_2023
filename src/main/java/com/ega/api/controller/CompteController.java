@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,25 +19,17 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/comptes")
 public class CompteController {
-    private final CompteService compteService;
-
     @Autowired
-    public CompteController(CompteService compteService) {
-        this.compteService = compteService;
-    }
+    CompteService compteService;
 
-    //@GetMapping("comptes/all")
-    //public List<Compte> ShowCompte(){
-        //return compteService.ShowComptes();
-    //}
 
     @GetMapping("/all")
-    public List<Compte> ShowCompte(){
-        Optional<List<Compte>> comptesOptional = compteService.ShowComptes();
-        if(comptesOptional.isPresent()){
-            return comptesOptional.get();
+    public List<Compte> getComptes(){
+        List<Compte> comptesOptional = compteService.getComptes();
+        if(comptesOptional.isEmpty()){
+            return Collections.emptyList();
         } else {
-            return new ArrayList<Compte>();
+            return comptesOptional;
         }
     }
 
