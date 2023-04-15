@@ -3,8 +3,10 @@ package com.ega.api.controller;
 
 import com.ega.api.entity.Compte;
 import com.ega.api.repository.CompteRepository;
+import com.ega.api.request.VirementRequest;
 import com.ega.api.service.CompteService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -84,6 +86,34 @@ public class CompteController {
             builder.append(chars.charAt(index));
         }
         return builder.toString();
+    }
+
+    @PostMapping("/virement")
+    public ResponseEntity<?> virement(@RequestBody VirementRequest virementRequest){
+        Optional<Compte> compteSourceOptional = compteService.findCompte(virementRequest.getCompteSource());
+        Optional<Compte> compteDestOptional = compteService.findCompte(virementRequest.getCompteDest());
+
+        Compte compteSource = compteSourceOptional.orElseThrow(()->new ResourceNotFoundException("Compte source non trouvé"));
+        Compte compteDest = compteDestOptional.orElseThrow(()-> new ResourceNotFoundException("Compte destinataire non trouvé"));
+
+        Double montant = virementRequest.getMontant();
+
+        Double soldeSource = compteSource.getSolde();
+
+        if(montant <= soldeSource){
+
+                Double soldeDest = compteDest.getSolde() + montant;
+                soldeSource -= montant;
+                compteSource.setSolde(soldeSource);
+                compteDest.setSolde(soldeDest);
+                compteService.SaveCompte(compteSource);
+                compteService.SaveCompte(compteDest);
+
+                return ResponseEntity.ok().build();
+
+        } else {
+            return ResponseEntity.badRequest().body("Solde insuffisant");
+        }
     }
 
 }
