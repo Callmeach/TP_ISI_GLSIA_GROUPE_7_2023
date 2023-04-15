@@ -5,6 +5,7 @@ import com.ega.api.entity.Compte;
 import com.ega.api.repository.CompteRepository;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,7 +46,7 @@ public class CompteService {
             Compte existingCompte = optionalCompte.get();
             existingCompte.setTypeCompte(compte.getTypeCompte());
             existingCompte.setClient(compte.getClient());
-            existingCompte.setSolde(compte.getSolde());
+            //existingCompte.setSolde(compte.getSolde());
             return compteRepository.save(existingCompte);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Le compte n'existe pas");
@@ -58,7 +59,7 @@ public class CompteService {
         if (compte.isPresent()) {
             compteRepository.deleteById(id);
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ce compte n'existe pas");
+            throw new ResourceNotFoundException("Ce compte n'existe pas");
         }
     }
 

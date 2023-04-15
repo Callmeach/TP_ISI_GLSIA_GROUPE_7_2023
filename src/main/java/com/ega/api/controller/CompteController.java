@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -49,12 +50,19 @@ public class CompteController {
 
     @PostMapping("/create")
     public Compte SaveCompte(@RequestBody Compte compte) {
-        // Vérifier si un compte avec le même numéro de compte existe déjà
-        Optional<Compte> optionalCompte = compteService.findByNumeroCompte(compte.getNumeroCompte());
-        if (optionalCompte.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Un compte avec ce numéro de compte existe déjà");
-        }
-        // Enregistrer le compte
+
+        Optional<Compte> optionalCompte;
+        String numeroCompte;
+        //Regenerer le numero de compte s'il en existe un avec le meme
+        do {
+            numeroCompte = generateRandomString(5).toUpperCase() + LocalDate.now().getYear();
+            optionalCompte = compteService.findByNumeroCompte(numeroCompte);
+        } while (optionalCompte.isPresent());
+
+        compte.setNumeroCompte(numeroCompte);
+        compte.setDateCreation(LocalDate.now());
+        compte.setSolde(0.0);
+
         return compteService.SaveCompte(compte);
     }
 
@@ -67,7 +75,15 @@ public class CompteController {
         compteService.deleteCompte(id);
     }
 
-
-
+    // Méthode utilitaire pour générer une chaîne aléatoire
+    private String generateRandomString(int length) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            int index = (int) (Math.random() * chars.length());
+            builder.append(chars.charAt(index));
+        }
+        return builder.toString();
+    }
 
 }
