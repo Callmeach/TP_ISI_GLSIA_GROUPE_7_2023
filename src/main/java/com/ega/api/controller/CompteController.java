@@ -2,8 +2,8 @@ package com.ega.api.controller;
 
 
 import com.ega.api.entity.Compte;
-import com.ega.api.repository.CompteRepository;
 import com.ega.api.request.VirementRequest;
+import com.ega.api.request.versementRequest;
 import com.ega.api.service.CompteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +23,6 @@ import java.util.Optional;
 public class CompteController {
     @Autowired
     CompteService compteService;
-
 
     @GetMapping("/all")
     public List<Compte> getComptes(){
@@ -90,11 +88,12 @@ public class CompteController {
 
     @PostMapping("/virement")
     public ResponseEntity<?> virement(@RequestBody VirementRequest virementRequest){
-        Optional<Compte> compteSourceOptional = compteService.findCompte(virementRequest.getCompteSource());
-        Optional<Compte> compteDestOptional = compteService.findCompte(virementRequest.getCompteDest());
 
-        Compte compteSource = compteSourceOptional.orElseThrow(()->new ResourceNotFoundException("Compte source non trouvé"));
-        Compte compteDest = compteDestOptional.orElseThrow(()-> new ResourceNotFoundException("Compte destinataire non trouvé"));
+        Compte compteSource = compteService.findCompte(virementRequest.getCompteSource())
+                .orElseThrow(()->new ResourceNotFoundException("Compte source non trouvé"));
+
+        Compte compteDest = compteService.findCompte(virementRequest.getCompteDest())
+                .orElseThrow(()-> new ResourceNotFoundException("Compte destinataire non trouvé"));
 
         Double montant = virementRequest.getMontant();
 
@@ -115,5 +114,26 @@ public class CompteController {
             return ResponseEntity.badRequest().body("Solde insuffisant");
         }
     }
+
+    //@PostMapping("/{id}/versement")
+    //public Compte verser(@PathVariable Integer id, @RequestBody Double montant) {
+        //Optional<Compte> compteOptional = compteService.findCompte(id);
+        //Compte compte = compteOptional.orElseThrow(() -> new ResourceNotFoundException("Compte non trouvée"));
+        //Double solde = compte.getSolde() + montant;
+        //compte.setSolde(solde);
+
+        //return compteService.SaveCompte(compte);
+   // }
+
+    @PostMapping("/{id}/versement")
+    public Compte verser(@PathVariable Integer id, @RequestBody versementRequest versementRequest) {
+
+        Compte compte = compteService.findCompte(id).orElseThrow(() -> new ResourceNotFoundException("Compte non trouvée"));
+        Double solde = compte.getSolde() + versementRequest.getMontant();
+        compte.setSolde(solde);
+
+        return compteService.SaveCompte(compte);
+    }
+
 
 }

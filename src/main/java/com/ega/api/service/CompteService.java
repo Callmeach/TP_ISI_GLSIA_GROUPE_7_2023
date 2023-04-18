@@ -1,6 +1,7 @@
 package com.ega.api.service;
 
 
+import com.ega.api.entity.Client;
 import com.ega.api.entity.Compte;
 import com.ega.api.repository.CompteRepository;
 import lombok.Data;
@@ -9,6 +10,8 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -62,5 +65,6 @@ public class CompteService {
             throw new ResourceNotFoundException("Ce compte n'existe pas");
         }
     }
+
 
 }
