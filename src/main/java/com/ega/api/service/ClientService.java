@@ -2,6 +2,8 @@ package com.ega.api.service;
 
 import com.ega.api.entity.Client;
 import com.ega.api.repository.ClientRepository;
+import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -10,14 +12,12 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 
+@Data
 @Service
 
 public class ClientService {
-    private final ClientRepository clientRepository;
-
-    public ClientService(ClientRepository clientRepository) {
-        this.clientRepository = clientRepository;
-    }
+    @Autowired
+    private ClientRepository clientRepository;
 
     public List<Client> getAllClients() {
         return clientRepository.findAll();
@@ -33,19 +33,18 @@ public Client getClientById(Integer id) {
     }
 }
 
-    public ResponseEntity<String> createClient(Client client) {
+    public Client createClient(Client client) {
         String email = client.getEmail();
         if (clientRepository.findByEmail(email).isPresent()) {
-            return ResponseEntity.badRequest().body("Cet email est déjà associé à un compte");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce email existe deja");
         }
-        Client savedClient = clientRepository.save(client);
-        return ResponseEntity.ok(String.valueOf(savedClient));
+        return clientRepository.save(client);
     }
 
 
 public Client updateClient(Integer id, Client client) {
     Optional<Client> optionalClient = clientRepository.findById(id);
-    if (!optionalClient.isPresent()) {
+    if (optionalClient.isEmpty()) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ce client n'existe pas");
     }
     Client existingClient = optionalClient.get();

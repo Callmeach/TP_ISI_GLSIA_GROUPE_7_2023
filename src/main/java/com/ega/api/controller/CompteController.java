@@ -99,7 +99,8 @@ public class CompteController {
 
         Double soldeSource = compteSource.getSolde();
 
-        if(montant <= soldeSource){
+        if(montant > 0){
+            if(montant <= soldeSource){
 
                 Double soldeDest = compteDest.getSolde() + montant;
                 soldeSource -= montant;
@@ -108,11 +109,15 @@ public class CompteController {
                 compteService.SaveCompte(compteSource);
                 compteService.SaveCompte(compteDest);
 
-                return ResponseEntity.ok().build();
+                return ResponseEntity.ok().body("Virement effectué avec succes");
 
+            } else {
+                return ResponseEntity.badRequest().body("Solde insuffisant");
+            }
         } else {
-            return ResponseEntity.badRequest().body("Solde insuffisant");
+            return ResponseEntity.badRequest().body("Montant incorrect");
         }
+
     }
 
     //@PostMapping("/{id}/versement")
@@ -128,11 +133,36 @@ public class CompteController {
     @PostMapping("/{id}/versement")
     public Compte verser(@PathVariable Integer id, @RequestBody versementRequest versementRequest) {
 
-        Compte compte = compteService.findCompte(id).orElseThrow(() -> new ResourceNotFoundException("Compte non trouvée"));
-        Double solde = compte.getSolde() + versementRequest.getMontant();
-        compte.setSolde(solde);
+        Compte compte = compteService.findCompte(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Compte non trouvé"));
+        if(versementRequest.getMontant() > 0){
+            Double solde = compte.getSolde() + versementRequest.getMontant();
+            compte.setSolde(solde);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Montant incorrect");
+        }
 
         return compteService.SaveCompte(compte);
+    }
+
+    @PostMapping("/{id}/retrait")
+    public Compte retirer(@PathVariable Integer id, @RequestBody versementRequest versementRequest) {
+
+        Compte compte = compteService.findCompte(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Compte non trouvé"));
+
+        Double solde = compte.getSolde();
+        Double montant = versementRequest.getMontant();
+        if(montant <= solde && montant > 0){
+            solde -= montant;
+            compte.setSolde(solde);
+            return compteService.SaveCompte(compte);
+        }
+        else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Le montant demandé est supérieur au solde disponible sur le compte ou invalide");
+        }
+
     }
 
 
